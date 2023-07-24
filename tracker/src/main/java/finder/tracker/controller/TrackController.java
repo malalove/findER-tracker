@@ -1,4 +1,4 @@
 package finder.tracker.controller;
 
-public class trackController {
+public class TrackController {
 }

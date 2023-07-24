@@ -1,4 +1,4 @@
 package finder.tracker.service;
 
-public class trackService {
+public class TrackService {
 }
