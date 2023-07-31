@@ -11,7 +11,9 @@ import javax.persistence.Table;
 @Table(name = "monday")
 @Getter
 @Setter
-public class DockerTest {
+public class Monday {
+    @Id
+    private String name;
     @Id
     private String time;
 
