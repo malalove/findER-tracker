@@ -1,14 +1,13 @@
 package finder.tracker.domain;
 
+import finder.tracker.idclass.FridayId;
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "Friday")
+@Table(name = "friday")
+@IdClass(FridayId.class)
 @Getter
 @Setter
 public class Friday {

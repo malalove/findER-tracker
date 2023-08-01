@@ -1,7 +1,10 @@
 package finder.tracker.service;
 
-import finder.tracker.XmlMapping.TestModel;
+import finder.tracker.domain.Monday;
+import finder.tracker.repository.MondayRepository;
+import finder.tracker.xmlmapping.TestModel;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,13 @@ import java.time.format.DateTimeFormatter;
 @Data
 @EnableScheduling
 public class TrackService {
+    MondayRepository mondayRepository;
+
+    @Autowired
+    public TrackService(MondayRepository mondayRepository) {
+        this.mondayRepository = mondayRepository;
+    }
+
     @Scheduled(cron = "0 * * * * *") // 스케줄링 주기 설정 (매 분)
     public void callApiWithExceptionHandling() {
         try {
@@ -25,7 +35,7 @@ public class TrackService {
             String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             System.out.println("Current Time: " + formattedCurrentTime);
 
-            callApi();
+            callApi(formattedCurrentTime);
         } catch (IOException e) {
             // IOException 예외 처리
             e.printStackTrace();
@@ -38,7 +48,7 @@ public class TrackService {
         }
     }
 
-    public void callApi() throws IOException, JAXBException {
+    public void callApi(String time) throws IOException, JAXBException {
         // HTTP Request 생성
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire"); // URL
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=xGPAD7pYa1ixlJ1OQJOrXhiiNSoEJqkoVBvHYMMHW%2B9qU4qRlp8KVsF3AIEEMgYrcvsH7E1SoLcQR8P8BX6TxA%3D%3D"); //Service Key
@@ -92,6 +102,8 @@ public class TrackService {
             Long hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
 
             System.out.println("병원: " + dutyName + ", 병상 수: " + hvec);
+
+            mondayRepository.save(new Monday(dutyName, time, Math.toIntExact(hvec)));
         }
     }
 }

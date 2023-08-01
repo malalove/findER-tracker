@@ -1,4 +1,4 @@
-package finder.tracker.XmlMapping;
+package finder.tracker.xmlmapping;
 
 import lombok.Data;
 import lombok.Getter;
@@ -11,11 +11,7 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
 @Setter
-public class Item {
-    // 기관명
-    @XmlElement(name = "dutyName")
-    private String dutyName;
-    // 병상 수
-    @XmlElement(name = "hvec")
-    private Long hvec;
+public class ResponseBody {
+    @XmlElement(name = "items")
+    private Items items;
 }

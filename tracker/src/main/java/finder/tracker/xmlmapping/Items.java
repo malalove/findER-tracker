@@ -1,6 +1,5 @@
-package finder.tracker.XmlMapping;
+package finder.tracker.xmlmapping;
 
-import finder.tracker.XmlMapping.Item;
 import lombok.Getter;
 import lombok.Setter;
 import javax.xml.bind.annotation.XmlAccessType;
