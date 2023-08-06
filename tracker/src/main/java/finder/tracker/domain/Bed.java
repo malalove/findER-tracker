@@ -1,16 +1,20 @@
 package finder.tracker.domain;
 
-import finder.tracker.idclass.ThursdayId;
+import finder.tracker.idclass.BedId;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "thursday")
-@IdClass(ThursdayId.class)
+@Table(name = "bed")
+@IdClass(BedId.class)
 @Getter
 @Setter
-public class Thursday {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Bed {
     @Id
     private String name;
     @Id

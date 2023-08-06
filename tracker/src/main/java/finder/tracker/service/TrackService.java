@@ -1,7 +1,7 @@
 package finder.tracker.service;
 
-import finder.tracker.domain.Monday;
-import finder.tracker.repository.MondayRepository;
+import finder.tracker.domain.Bed;
+import finder.tracker.repository.TrackRepository;
 import finder.tracker.xmlmapping.TestModel;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +15,19 @@ import java.io.*;
 import java.net.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Data
 @EnableScheduling
 public class TrackService {
-    MondayRepository mondayRepository;
+    TrackRepository trackRepository;
+    List<Bed> bedList = new ArrayList<>();
 
     @Autowired
-    public TrackService(MondayRepository mondayRepository) {
-        this.mondayRepository = mondayRepository;
+    public TrackService(TrackRepository trackRepository) {
+        this.trackRepository = trackRepository;
     }
 
     @Scheduled(cron = "0 * * * * *") // 스케줄링 주기 설정 (매 분)
@@ -77,8 +80,15 @@ public class TrackService {
         // HTTP Response 저장
         StringBuilder sb = new StringBuilder();
         String line;
-        while ((line = rd.readLine()) != null) {
-            sb.append(line);
+
+        try {
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            // 파일 읽기 또는 네트워크 통신 중에 발생하는 예외 처리
+            e.printStackTrace();
+            errorHandler();
         }
 
         rd.close();
@@ -96,14 +106,25 @@ public class TrackService {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StringReader reader = new StringReader(xmlData);
         TestModel hospitalResponse = (TestModel) unmarshaller.unmarshal(reader);
+        System.out.println("Data 수 : " + hospitalResponse.getBody().getItems().getItem().size());
 
         for (int i=0; i <= 412; i++) {
             String dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
             Long hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
 
-            System.out.println("병원: " + dutyName + ", 병상 수: " + hvec);
+            if (hvec == null || hvec < 0) {
+                hvec = 0L;
+            }
 
-            mondayRepository.save(new Monday(dutyName, time, Math.toIntExact(hvec)));
+            // System.out.println("병원: " + dutyName + ", 병상 수: " + hvec);
+
+            bedList.add(new Bed(dutyName, time, Math.toIntExact(hvec)));
         }
+
+        trackRepository.saveAll(bedList);
+    }
+
+    public void errorHandler() {
+        trackRepository.saveAll(bedList);
     }
 }
