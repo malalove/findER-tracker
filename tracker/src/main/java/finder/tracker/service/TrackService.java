@@ -35,19 +35,22 @@ public class TrackService {
         try {
             LocalDateTime currentTime = LocalDateTime.now();
             // LocalDateTime localDateTime = LocalDateTime.now().plusHours(9);
-            String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             System.out.println("Current Time: " + formattedCurrentTime);
 
             callApi(formattedCurrentTime);
         } catch (IOException e) {
             // IOException 예외 처리
             e.printStackTrace();
+            errorHandler();
         } catch (JAXBException e) {
             // JAXBException 예외 처리
             e.printStackTrace();
+            errorHandler();
         } catch (Exception e) {
             // 기타 예외 처리
             e.printStackTrace();
+            errorHandler();
         }
     }
 
@@ -94,10 +97,6 @@ public class TrackService {
         rd.close();
         conn.disconnect();
 
-        // 데이터 받아오는데 소요된 시간 출력
-        long endTime = System.currentTimeMillis();
-        System.out.println("소요 시간: " + (endTime - startTime) + "ms");
-
         String xmlData = sb.toString();
         // System.out.println(xmlData);
 
@@ -112,19 +111,35 @@ public class TrackService {
             String dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
             Long hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
 
-            if (hvec == null || hvec < 0) {
-                hvec = 0L;
-            }
-
             // System.out.println("병원: " + dutyName + ", 병상 수: " + hvec);
 
-            bedList.add(new Bed(dutyName, time, Math.toIntExact(hvec)));
+            try {
+                bedList.add(new Bed(dutyName, time, Math.toIntExact(hvec)));
+            } catch (Exception e) {
+                hvec = 0L;
+                bedList.add(new Bed(dutyName, time, Math.toIntExact(hvec)));
+            }
         }
 
         trackRepository.saveAll(bedList);
+
+        // 데이터 받아와서 저장하기까지 소요된 시간 출력
+        long endTime = System.currentTimeMillis();
+        System.out.println("callApi() 함수 소요 시간: " + (endTime - startTime) + "ms");
     }
 
     public void errorHandler() {
+        // 현재 시간 기록
+        long startTime = System.currentTimeMillis();
+
+        for (Bed bed : bedList) {
+            bed.increaseByOneMinute();
+        }
+
         trackRepository.saveAll(bedList);
+
+        // 데이터 저장하기까지 소요된 시간 출력
+        long endTime = System.currentTimeMillis();
+        System.out.println("errorHandler() 함수 소요 시간: " + (endTime - startTime) + "ms");
     }
 }
