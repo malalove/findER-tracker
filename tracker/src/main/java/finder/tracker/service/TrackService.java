@@ -30,7 +30,7 @@ public class TrackService {
         this.trackRepository = trackRepository;
     }
 
-    @Scheduled(cron = "0 * * * * *") // 스케줄링 주기 설정 (매 분)
+    @Scheduled(cron = "1 * * * * *") // 스케줄링 주기 설정 (매 분 1초)
     public void callApiWithExceptionHandling() {
         try {
             LocalDateTime currentTime = LocalDateTime.now();
@@ -106,6 +106,8 @@ public class TrackService {
         StringReader reader = new StringReader(xmlData);
         TestModel hospitalResponse = (TestModel) unmarshaller.unmarshal(reader);
         System.out.println("Data 수 : " + hospitalResponse.getBody().getItems().getItem().size());
+
+        bedList.clear();
 
         for (int i=0; i <= 412; i++) {
             String dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
