@@ -33,8 +33,8 @@ public class TrackService {
     @Scheduled(cron = "1 * * * * *") // 스케줄링 주기 설정 (매 분 1초)
     public void callApiWithExceptionHandling() {
         try {
-            LocalDateTime currentTime = LocalDateTime.now();
-            // LocalDateTime localDateTime = LocalDateTime.now().plusHours(9);
+            // LocalDateTime currentTime = LocalDateTime.now();
+            LocalDateTime currentTime = LocalDateTime.now().plusHours(9);
             String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             System.out.println("Current Time: " + formattedCurrentTime);
 
