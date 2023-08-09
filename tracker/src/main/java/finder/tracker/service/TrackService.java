@@ -35,7 +35,7 @@ public class TrackService {
         try {
             // LocalDateTime currentTime = LocalDateTime.now();
             LocalDateTime currentTime = LocalDateTime.now().plusHours(9);
-            String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             System.out.println("Current Time: " + formattedCurrentTime);
 
             callApi(formattedCurrentTime);
