@@ -14,7 +14,6 @@ import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +34,9 @@ public class TrackService {
         try {
             // LocalDateTime currentTime = LocalDateTime.now();
             LocalDateTime currentTime = LocalDateTime.now().plusHours(9);
-            String formattedCurrentTime = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-            System.out.println("Current Time: " + formattedCurrentTime);
+            System.out.println("Current Time: " + currentTime);
 
-            callApi(formattedCurrentTime);
+            callApi(currentTime);
         } catch (IOException e) {
             // IOException 예외 처리
             e.printStackTrace();
@@ -54,7 +52,7 @@ public class TrackService {
         }
     }
 
-    public void callApi(String time) throws IOException, JAXBException {
+    public void callApi(LocalDateTime time) throws IOException, JAXBException {
         // HTTP Request 생성
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire"); // URL
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=xGPAD7pYa1ixlJ1OQJOrXhiiNSoEJqkoVBvHYMMHW%2B9qU4qRlp8KVsF3AIEEMgYrcvsH7E1SoLcQR8P8BX6TxA%3D%3D"); //Service Key
@@ -135,7 +133,7 @@ public class TrackService {
         long startTime = System.currentTimeMillis();
 
         for (Bed bed : bedList) {
-            bed.increaseByOneMinute();
+            bed.getTime().plusMinutes(1);
         }
 
         trackRepository.saveAll(bedList);
