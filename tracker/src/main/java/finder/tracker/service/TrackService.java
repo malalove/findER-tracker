@@ -14,6 +14,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,27 +33,20 @@ public class TrackService {
     @Scheduled(cron = "1 * * * * *") // 스케줄링 주기 설정 (매 분 1초)
     public void callApiWithExceptionHandling() {
         try {
-            // LocalDateTime currentTime = LocalDateTime.now();
-            LocalDateTime currentTime = LocalDateTime.now().plusHours(9);
-            System.out.println("Current Time: " + currentTime);
+            LocalDateTime localDateTime = LocalDateTime.now();
+            String time = localDateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-            callApi(currentTime);
-        } catch (IOException e) {
-            // IOException 예외 처리
-            e.printStackTrace();
-            errorHandler();
-        } catch (JAXBException e) {
-            // JAXBException 예외 처리
-            e.printStackTrace();
-            errorHandler();
+            System.out.println("Current Time: " + localDateTime);
+
+            callApi(time, localDateTime);
         } catch (Exception e) {
-            // 기타 예외 처리
+            // 예외 처리
             e.printStackTrace();
             errorHandler();
         }
     }
 
-    public void callApi(LocalDateTime time) throws IOException, JAXBException {
+    public void callApi(String time, LocalDateTime localDateTime) throws IOException, JAXBException {
         // HTTP Request 생성
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire"); // URL
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=xGPAD7pYa1ixlJ1OQJOrXhiiNSoEJqkoVBvHYMMHW%2B9qU4qRlp8KVsF3AIEEMgYrcvsH7E1SoLcQR8P8BX6TxA%3D%3D"); //Service Key
@@ -89,7 +83,6 @@ public class TrackService {
         } catch (IOException e) {
             // 파일 읽기 또는 네트워크 통신 중에 발생하는 예외 처리
             e.printStackTrace();
-            errorHandler();
         }
 
         rd.close();
@@ -107,17 +100,22 @@ public class TrackService {
 
         bedList.clear();
 
-        for (int i=0; i <= 412; i++) {
-            String dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
-            Long hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
-
-            // System.out.println("병원: " + dutyName + ", 병상 수: " + hvec);
+        for (int i=0; i < hospitalResponse.getBody().getItems().getItem().size(); i++) {
+            String dutyName;
+            Long hvec;
 
             try {
-                bedList.add(new Bed(dutyName, time, Math.toIntExact(hvec)));
+                dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
+                hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
+            } catch (Exception e) {
+                break;
+            }
+
+            try {
+                bedList.add(new Bed(dutyName, time, localDateTime, Math.toIntExact(hvec)));
             } catch (Exception e) {
                 hvec = 0L;
-                bedList.add(new Bed(dutyName, time, Math.toIntExact(hvec)));
+                bedList.add(new Bed(dutyName, time, localDateTime, Math.toIntExact(hvec)));
             }
         }
 
@@ -133,7 +131,8 @@ public class TrackService {
         long startTime = System.currentTimeMillis();
 
         for (Bed bed : bedList) {
-            bed.getTime().plusMinutes(1);
+            bed.increaseByOneMinute();
+            bed.setLocalDateTime(bed.getLocalDateTime().plusMinutes(1));
         }
 
         trackRepository.saveAll(bedList);
