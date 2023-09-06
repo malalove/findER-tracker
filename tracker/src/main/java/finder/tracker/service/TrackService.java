@@ -101,15 +101,8 @@ public class TrackService {
         bedList.clear();
 
         for (int i=0; i < hospitalResponse.getBody().getItems().getItem().size(); i++) {
-            String dutyName;
-            Long hvec;
-
-            try {
-                dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
-                hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
-            } catch (Exception e) {
-                break;
-            }
+            String dutyName = hospitalResponse.getBody().getItems().getItem().get(i).getDutyName();
+            Long hvec = hospitalResponse.getBody().getItems().getItem().get(i).getHvec();
 
             try {
                 bedList.add(new Bed(dutyName, time, localDateTime, Math.toIntExact(hvec)));
