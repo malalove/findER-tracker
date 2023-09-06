@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Data
@@ -24,6 +25,7 @@ import java.util.List;
 public class TrackService {
     TrackRepository trackRepository;
     List<Bed> bedList = new ArrayList<>();
+    int sizeBuff = -1;
 
     @Autowired
     public TrackService(TrackRepository trackRepository) {
@@ -46,7 +48,7 @@ public class TrackService {
         }
     }
 
-    public void callApi(String time, LocalDateTime localDateTime) throws IOException, JAXBException {
+    public void callApi(String time, LocalDateTime localDateTime) throws Exception {
         // HTTP Request 생성
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire"); // URL
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=xGPAD7pYa1ixlJ1OQJOrXhiiNSoEJqkoVBvHYMMHW%2B9qU4qRlp8KVsF3AIEEMgYrcvsH7E1SoLcQR8P8BX6TxA%3D%3D"); //Service Key
@@ -96,7 +98,14 @@ public class TrackService {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         StringReader reader = new StringReader(xmlData);
         TestModel hospitalResponse = (TestModel) unmarshaller.unmarshal(reader);
+
         System.out.println("Data 수 : " + hospitalResponse.getBody().getItems().getItem().size());
+
+        if (Objects.equals(sizeBuff, -1))
+            sizeBuff = hospitalResponse.getBody().getItems().getItem().size();
+
+        if (!Objects.equals(sizeBuff, hospitalResponse.getBody().getItems().getItem().size()))
+            throw new Exception("특정 병원에 대한 데이터가 누락되었습니다.");
 
         bedList.clear();
 
