@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.net.*;
@@ -42,7 +41,6 @@ public class TrackService {
 
             callApi(time, localDateTime);
         } catch (Exception e) {
-            // 예외 처리
             e.printStackTrace();
             errorHandler();
         }
@@ -82,8 +80,7 @@ public class TrackService {
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }
-        } catch (IOException e) {
-            // 파일 읽기 또는 네트워크 통신 중에 발생하는 예외 처리
+        } catch (IOException e) { // 파일 읽기 또는 네트워크 통신 중에 발생하는 예외 처리
             e.printStackTrace();
         }
 
@@ -91,7 +88,6 @@ public class TrackService {
         conn.disconnect();
 
         String xmlData = sb.toString();
-        // System.out.println(xmlData);
 
         // XML 데이터를 Java 객체로 변환 (언마샬링)
         JAXBContext jaxbContext = JAXBContext.newInstance(TestModel.class);
@@ -139,7 +135,7 @@ public class TrackService {
 
         trackRepository.saveAll(bedList);
 
-        // 데이터 저장하기까지 소요된 시간 출력
+        // 데이터가 저장되기까지 소요된 시간 출력
         long endTime = System.currentTimeMillis();
         System.out.println("errorHandler() 함수 소요 시간: " + (endTime - startTime) + "ms");
     }
